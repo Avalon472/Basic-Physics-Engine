@@ -1,0 +1,1 @@
+This project is meant to showcase a basic physics engine using C++ and the SFML graphics library.
