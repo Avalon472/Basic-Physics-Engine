@@ -18,7 +18,8 @@ int main() {
     shape.setPosition(circlePosition);
 
     sf::Vector2f position = circlePosition;
-    sf::Vector2f velocity;
+    sf::Vector2f lastPosition = circlePosition;
+    lastPosition.y -= 50;
     sf::Vector2f acceleration;
     sf::Clock clock;
 
@@ -30,13 +31,9 @@ int main() {
                 window.close();
             if(event.type == sf::Event::KeyPressed){
                 if(event.key.code == sf::Keyboard::Escape) window.close();
-                if(event.key.code == sf::Keyboard::A) {
-                    acceleration.x -= 1000;
+                if(event.key.code == sf::Keyboard::R) {
+                    acceleration.x -= 500;
                     acceleration.y -= 500;
-                }
-                if(event.key.code == sf::Keyboard::D) {
-                    acceleration.x += 1000;
-                    acceleration.y += 500;
                 }
                 if(event.key.code == sf::Keyboard::Space) acceleration.x += 2000;
             }
@@ -48,33 +45,21 @@ int main() {
         float dt = clock.restart().asSeconds();
         applyGravity(acceleration);
 
-        //Position prediction
-        velocity += acceleration*dt;
-        sf::Vector2f newPosition = position + velocity*dt;
-        //Top wall detection
-        if(newPosition.y<0){
-            newPosition.y = 0;
-            velocity.y *= -1.015;
+
+        sf::Vector2f displacement = position - lastPosition;
+        if(position.y < 0 || position.y > 1000 - radius*2) {
+            acceleration.y *= -1;
+            if(position.y > 1000-radius*2) position.y = 1000-radius*2;
         }
-        //Bottom wall detection
-        if(newPosition.y> 1000 - radius*2){
-            newPosition.y = 1000 - radius*2;
-            velocity.y *= -1.015;
+        if(position.x < 0 || position.x > 1000 - radius*2) {
+            acceleration.x *= -1;
         }
-        //Left wall detection
-        if(newPosition.x<0){
-            newPosition.x = 0;
-            velocity.x *= -1.015;
-        }
-        //Right wall detection
-        if(newPosition.x> 1000 - radius*2){
-            newPosition.x = 1000 - radius*2;
-            velocity.x *= -1.015;
-        }
-        position = newPosition;
+        lastPosition = position;
+        position += displacement + acceleration*dt*dt;
 
         std::cout << "Position: " << position.y << std::endl;
-        std::cout << "Velocity: " << velocity.y << std::endl;
+        std::cout << "Displacement: " << displacement.y << std::endl;
+        std::cout << "Acceleration in Y: " << acceleration.y << std::endl;
         std::cout << dt << std::endl;
 
         //Reset values
